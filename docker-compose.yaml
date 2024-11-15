@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - microservices-network
+
+  books:
+    build:
+      context: ./books
+      dockerfile: Dockerfile
+    container_name: books_service
+    environment:
+      - MONGO_URI=mongodb://db:27017/books
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - microservices-network
+
+  customers:
+    build:
+      context: ./customers
+      dockerfile: Dockerfile
+    container_name: customers_service
+    environment:
+      - MONGO_URI=mongodb://db:27017/customers
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    networks:
+      - microservices-network
+
+  orders:
+    build:
+      context: ./orders
+      dockerfile: Dockerfile
+    container_name: orders_service
+    environment:
+      - MONGO_URI=mongodb://db:27017/orders
+    ports:
+      - "9000:9000"
+    depends_on:
+      - db
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+
+volumes:
+  mongo_data:
